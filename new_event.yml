@@ -1,0 +1,59 @@
+name: Предложить случай в архив
+description: Смерч, шквал, крупный град, сухая гроза или ливневый паводок в Якутии
+title: "[случай] "
+labels: ["новый случай"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Заполните что знаете. Если источника нет — всё равно заводите,
+        поставив достоверность «требует проверки». Пустая строка в архиве
+        честнее уверенного вымысла.
+  - type: input
+    id: date
+    attributes:
+      label: Дата
+      description: ГГГГ-ММ-ДД. Если точный день неизвестен, укажите примерный и отметьте это ниже.
+      placeholder: "2026-06-17"
+    validations: {required: true}
+  - type: checkboxes
+    id: approx
+    attributes:
+      label: Точность даты
+      options:
+        - label: Дата примерная
+  - type: dropdown
+    id: cat
+    attributes:
+      label: Тип явления
+      options: [Смерч, Шквал, Град, Гроза/ливень, Паводок, "Сухая гроза → пожар"]
+    validations: {required: true}
+  - type: input
+    id: loc
+    attributes:
+      label: Место
+      description: Как можно точнее — село и район, а не «Центральная Якутия». Записи без точки не годятся для сверки с моделью.
+      placeholder: "с. Борогонцы, Усть-Алданский район"
+    validations: {required: true}
+  - type: textarea
+    id: detail
+    attributes:
+      label: Что произошло
+      description: Факты и последствия. Числа лучше эпитетов.
+      placeholder: "Вихрь поднял гаражную дверь весом ~20 кг, пострадавших нет."
+    validations: {required: true}
+  - type: input
+    id: src
+    attributes:
+      label: Источники
+      description: Через запятую. Издание, официальное сообщение, автор видео.
+      placeholder: "ЯСИА, SakhaLife"
+  - type: dropdown
+    id: cred
+    attributes:
+      label: Достоверность
+      options:
+        - "подтверждено — есть публикация или официальное сообщение"
+        - "частично — источник есть, но детали не сходятся"
+        - "требует проверки — свидетельство без подтверждения"
+    validations: {required: true}

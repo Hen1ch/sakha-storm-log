@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Журнал конвективных явлений — Республика Саха (Якутия)</title>
+<meta name="description" content="Открытый архив задокументированных смерчей, шквалов, крупного града и сухих гроз в Якутии. Каждая запись — с источником и меткой достоверности.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------
+   Палитра взята из радарной шкалы — родного языка предмета.
+   Цветом кодируется НЕ тип явления, а сила доказательства: это
+   главное свойство архива, всё остальное держим в графите.
+   ------------------------------------------------------------------ */
+:root{
+  --paper:#EDF0F2;      /* холодная бумага синоптической карты */
+  --paper-2:#E3E8EB;
+  --card:#F7F9FA;
+  --ink:#17222D;
+  --ink-2:#3E4E5C;
+  --muted:#6B7C88;
+  --rule:#C9D2D8;
+
+  --conf-green:#2E7D6E;   /* подтверждено */
+  --conf-amber:#B8860F;   /* частично     */
+  --conf-red:#B3423A;     /* требует проверки */
+
+  --maxw:1180px;
+  --r:3px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--paper-2) 1px,transparent 1px);
+  background-size:100% 34px;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:inherit}
+
+/* ---------- шапка ---------- */
+.top{
+  border-bottom:1px solid var(--rule);background:rgba(237,240,242,.92);
+  backdrop-filter:blur(6px);position:sticky;top:0;z-index:20
+}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;
+  gap:16px;padding-top:11px;padding-bottom:11px;flex-wrap:wrap}
+.mark{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-2)}
+.mark b{font-weight:600;color:var(--ink)}
+.upd{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted)}
+
+/* ---------- герой ---------- */
+.hero{padding:56px 0 12px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 18px}
+h1{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;
+  font-size:clamp(30px,5.2vw,54px);line-height:1.08;letter-spacing:-.015em;margin:0 0 20px;
+  max-width:19ch}
+.lede{max-width:62ch;color:var(--ink-2);margin:0 0 8px}
+.lede strong{font-weight:600;color:var(--ink)}
+
+/* ---------- сигнатура: полоса времени с пробелами ---------- */
+.strip{margin:38px 0 10px}
+.strip-head{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.axis{position:relative;height:96px;border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);background:var(--card)}
+.tick{position:absolute;bottom:0;width:3px;border-radius:1px 1px 0 0;
+  transition:opacity .15s}
+.axis:hover .tick{opacity:.42}
+.axis .tick:hover{opacity:1}
+.yearlab{position:absolute;top:6px;font-family:"IBM Plex Mono",monospace;
+  font-size:10.5px;color:var(--muted);transform:translateX(-50%)}
+.yearline{position:absolute;top:0;bottom:0;width:1px;background:var(--rule)}
+.strip-note{font-size:13.5px;color:var(--muted);margin:10px 0 0;max-width:64ch}
+
+/* ---------- счётчики ---------- */
+.counts{display:flex;flex-wrap:wrap;gap:0;margin:34px 0 6px;
+  border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+.count{flex:1 1 128px;padding:14px 16px;border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);background:var(--card)}
+.count b{display:block;font-family:"IBM Plex Mono",monospace;font-weight:600;
+  font-size:26px;line-height:1.1;letter-spacing:-.02em}
+.count span{font-family:"IBM Plex Mono",monospace;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- фильтры ---------- */
+.tools{position:sticky;top:44px;z-index:10;background:rgba(237,240,242,.94);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--rule);
+  padding:12px 0;margin:34px 0 0}
+.tools .wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input[type=search]{
+  font:inherit;font-size:14px;padding:7px 12px;min-width:230px;flex:1 1 230px;
+  border:1px solid var(--rule);border-radius:var(--r);background:var(--card);color:var(--ink)}
+input[type=search]:focus{outline:2px solid var(--ink);outline-offset:1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;padding:6px 12px;cursor:pointer;
+  border:1px solid var(--rule);border-radius:var(--r);background:var(--card);color:var(--ink-2)}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.count-line{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);
+  margin-left:auto;white-space:nowrap}
+
+/* ---------- записи ---------- */
+.entries{margin:0 0 72px;padding:6px 0 0}
+.entry{display:grid;grid-template-columns:96px 1fr;gap:0 20px;
+  padding:20px 0 20px 16px;border-bottom:1px solid var(--rule);
+  border-left:3px solid var(--rule);background:transparent}
+.entry.green{border-left-color:var(--conf-green)}
+.entry.yellow{border-left-color:var(--conf-amber)}
+.entry.red{border-left-color:var(--conf-red)}
+.when{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-2);
+  padding-top:2px;white-space:nowrap}
+.when .approx{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.05em}
+.body h3{margin:0 0 4px;font-family:"IBM Plex Serif",Georgia,serif;
+  font-weight:600;font-size:19px;line-height:1.25;letter-spacing:-.005em}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
+.cat{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-2);border:1px solid var(--rule);
+  border-radius:var(--r);padding:2px 7px;background:var(--card)}
+.where{font-size:13.5px;color:var(--muted)}
+.detail{margin:0 0 10px;color:var(--ink-2);max-width:76ch}
+.src{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.src .lab{letter-spacing:.07em;text-transform:uppercase}
+.conf{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;padding:2px 7px;border-radius:var(--r);white-space:nowrap}
+.conf.green{color:var(--conf-green);border:1px solid var(--conf-green)}
+.conf.yellow{color:var(--conf-amber);border:1px solid var(--conf-amber)}
+.conf.red{color:var(--conf-red);border:1px solid var(--conf-red)}
+
+.empty{padding:52px 0;color:var(--muted);max-width:56ch}
+.empty b{display:block;color:var(--ink);font-family:"IBM Plex Serif",serif;
+  font-size:20px;margin-bottom:6px}
+
+/* ---------- как пополнять ---------- */
+.foot{border-top:1px solid var(--rule);background:var(--card);padding:40px 0 60px}
+.foot h2{font-family:"IBM Plex Serif",serif;font-size:22px;margin:0 0 12px}
+.foot p{max-width:66ch;color:var(--ink-2);margin:0 0 12px}
+.btn{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:13px;
+  letter-spacing:.05em;text-decoration:none;padding:10px 18px;border-radius:var(--r);
+  background:var(--ink);color:var(--paper);border:1px solid var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin:22px 0 0;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;
+  margin-right:6px;vertical-align:-1px}
+
+@media (max-width:640px){
+  .entry{grid-template-columns:1fr;gap:6px}
+  .when{padding-top:0}
+  .tools{position:static}
+  .count-line{margin-left:0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="mark"><b>Журнал конвективных явлений</b> · Республика Саха (Якутия)</div>
+    <div class="upd" id="upd"></div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Открытый архив · пополняется вручную</p>
+    <h1>Что задокументировано, а что просто никто не увидел</h1>
+    <p class="lede">Смерчи, шквалы, крупный град и сухие грозы в Якутии — по одной записи на случай, каждая со ссылкой на источник и пометкой, насколько ей можно верить. <strong>Архив не претендует на полноту:</strong> сюда попадает лишь то, что кто-то заметил и о чём написали.</p>
+
+    <div class="strip">
+      <div class="strip-head"><span id="stripFrom"></span><span>плотность записей по годам</span><span id="stripTo"></span></div>
+      <div class="axis" id="axis" role="img" aria-label="Распределение записей архива по годам"></div>
+      <p class="strip-note">Провалы на шкале — это пробелы наблюдения, а не спокойные годы. Половина записей приходится на последний год просто потому, что свежие новости ищутся легче старых.</p>
+    </div>
+
+    <div class="counts" id="counts"></div>
+  </div>
+</section>
+
+<section class="tools">
+  <div class="wrap">
+    <label class="sr" for="q">Поиск по записям</label>
+    <input id="q" type="search" placeholder="Село, район, слово из описания">
+    <div class="chips" id="chips"></div>
+    <div class="count-line" id="shown"></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="entries" id="list"></div>
+</section>
+
+<section class="foot">
+  <div class="wrap">
+    <h2>Как добавить случай</h2>
+    <p>Записи вносятся через GitHub — так у каждой правки остаётся автор, дата и видно, что именно изменилось. Ничего не появляется в архиве анонимно, и любую запись можно откатить.</p>
+    <p>Если явление известно, но источника нет — всё равно заводите, с пометкой «требует проверки». Пустая строка в архиве честнее уверенного вымысла.</p>
+    <p>
+      <a class="btn" id="addLink" href="#">Предложить случай</a>
+      <a class="btn ghost" id="repoLink" href="#">Открыть репозиторий</a>
+    </p>
+    <div class="legend">
+      <span><i style="background:var(--conf-green)"></i>подтверждено — есть публикация или официальное сообщение</span>
+      <span><i style="background:var(--conf-amber)"></i>частично — источник есть, но детали не сходятся</span>
+      <span><i style="background:var(--conf-red)"></i>требует проверки — свидетельство без подтверждения</span>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+/* Репозиторий определяется по адресу GitHub Pages, чтобы кнопки вели
+   куда надо без правки кода при форке. */
+const REPO = (() => {
+  const h = location.hostname, p = location.pathname.split('/').filter(Boolean);
+  if (h.endsWith('github.io')) {
+    const user = h.split('.')[0];
+    return `https://github.com/${user}/${p[0] || (user + '.github.io')}`;
+  }
+  return 'https://github.com';
+})();
+document.getElementById('repoLink').href = REPO;
+document.getElementById('addLink').href =
+  REPO + '/issues/new?template=new_event.yml';
+
+const CATS = {tornado:'Смерч', squall:'Шквал', hail:'Град',
+  thunderstorm:'Гроза/ливень', flood:'Паводок', fire:'Сухая гроза → пожар'};
+const CRED = {green:'подтверждено', yellow:'частично', red:'требует проверки'};
+/* Цвет тика на шкале — по достоверности, как и всюду на странице. */
+const CRED_COLOR = {green:'var(--conf-green)', yellow:'var(--conf-amber)', red:'var(--conf-red)'};
+
+let DATA = [], filterCat = 'all', query = '';
+
+fetch('data/archive.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(j => { DATA = j.events || []; boot(j); })
+  .catch(err => {
+    document.getElementById('list').innerHTML =
+      '<div class="empty"><b>Архив не загрузился</b>' +
+      'Страница читает data/archive.json рядом с собой. При открытии файла ' +
+      'напрямую с диска браузер это запрещает — откройте сайт по адресу ' +
+      'GitHub Pages либо запустите локально командой <code>python -m http.server</code>. ' +
+      '<br><br>Техническая причина: ' + err.message + '</div>';
+  });
+
+function boot(j){
+  document.getElementById('upd').textContent = 'обновлено ' + (j.updated || '—');
+  const years = DATA.map(d => +d.date.slice(0,4));
+  const y0 = Math.min(...years), y1 = Math.max(...years);
+  document.getElementById('stripFrom').textContent = y0;
+  document.getElementById('stripTo').textContent = y1;
+  drawAxis(y0, y1);
+  drawCounts();
+  drawChips();
+  render();
+  document.getElementById('q').addEventListener('input', e => {
+    query = e.target.value.trim().toLowerCase(); render();
+  });
+}
+
+function drawAxis(y0, y1){
+  const ax = document.getElementById('axis');
+  const span = (y1 - y0 + 1);
+  /* по одному делению на год */
+  for (let y = y0; y <= y1 + 1; y++){
+    const x = (y - y0) / span * 100;
+    if (y <= y1){
+      const lab = document.createElement('span');
+      lab.className = 'yearlab';
+      lab.style.left = (x + 100 / span / 2) + '%';
+      lab.textContent = String(y).slice(2);
+      ax.appendChild(lab);
+    }
+    if (y > y0){
+      const ln = document.createElement('span');
+      ln.className = 'yearline'; ln.style.left = x + '%';
+      ax.appendChild(ln);
+    }
+  }
+  /* тик на каждую запись, ставится по дню внутри года */
+  const perYear = {};
+  DATA.forEach(d => { const y = d.date.slice(0,4); (perYear[y] = perYear[y] || []).push(d); });
+  DATA.forEach(d => {
+    const y = +d.date.slice(0,4), m = +d.date.slice(5,7), day = +d.date.slice(8,10);
+    const frac = ((m - 1) * 31 + day) / 372;
+    const x = ((y - y0) + frac) / span * 100;
+    const n = perYear[d.date.slice(0,4)].length;
+    const t = document.createElement('span');
+    t.className = 'tick';
+    t.style.left = x + '%';
+    t.style.height = Math.min(76, 22 + n * 4) + 'px';
+    t.style.background = CRED_COLOR[d.cred] || 'var(--muted)';
+    t.title = `${d.date} · ${CATS[d.cat] || d.cat} · ${d.loc}`;
+    ax.appendChild(t);
+  });
+}
+
+function drawCounts(){
+  const by = {};
+  DATA.forEach(d => by[d.cat] = (by[d.cat] || 0) + 1);
+  const years = new Set(DATA.map(d => d.date.slice(0,4))).size;
+  const items = [['Записей', DATA.length], ['Лет охвачено', years]]
+    .concat(Object.keys(CATS).filter(c => by[c]).map(c => [CATS[c], by[c]]));
+  document.getElementById('counts').innerHTML = items
+    .map(([k, v]) => `<div class="count"><b>${v}</b><span>${k}</span></div>`).join('');
+}
+
+function drawChips(){
+  const by = {};
+  DATA.forEach(d => by[d.cat] = (by[d.cat] || 0) + 1);
+  const cats = ['all'].concat(Object.keys(CATS).filter(c => by[c]));
+  document.getElementById('chips').innerHTML = cats.map(c =>
+    `<button class="chip" data-c="${c}" aria-pressed="${c === 'all'}">` +
+    (c === 'all' ? 'Все' : CATS[c]) + `</button>`).join('');
+  document.getElementById('chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    filterCat = b.dataset.c;
+    [...document.querySelectorAll('.chip')].forEach(x =>
+      x.setAttribute('aria-pressed', x === b));
+    render();
+  });
+}
+
+function render(){
+  let rows = DATA.filter(d => filterCat === 'all' || d.cat === filterCat);
+  if (query){
+    rows = rows.filter(d => (d.title + ' ' + d.loc + ' ' + d.detail + ' ' +
+      (d.sources || []).join(' ')).toLowerCase().includes(query));
+  }
+  rows.sort((a, b) => b.date.localeCompare(a.date));
+  document.getElementById('shown').textContent =
+    `${rows.length} из ${DATA.length}`;
+
+  const list = document.getElementById('list');
+  if (!rows.length){
+    list.innerHTML = '<div class="empty"><b>Ничего не нашлось</b>' +
+      'Попробуйте другое слово или снимите фильтр по типу явления.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(d => `
+    <article class="entry ${d.cred}">
+      <div class="when">${d.date}${d.approx_date ?
+        '<span class="approx">дата примерная</span>' : ''}</div>
+      <div class="body">
+        <div class="meta">
+          <span class="cat">${CATS[d.cat] || d.cat}</span>
+          <span class="conf ${d.cred}">${CRED[d.cred] || d.cred}</span>
+          <span class="where">${esc(d.loc)}</span>
+        </div>
+        <h3>${esc(d.title)}</h3>
+        <p class="detail">${esc(d.detail)}</p>
+        <p class="src"><span class="lab">источник</span>${
+          (d.sources || []).map(s => esc(s)).join(' · ') || '—'}</p>
+      </div>
+    </article>`).join('');
+}
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g,
+    c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+</script>
+</body>
+</html>
