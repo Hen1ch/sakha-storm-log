@@ -1,0 +1,32 @@
+name: Поиск кандидатов в архив
+
+# Раз в неделю по понедельникам + вручную кнопкой.
+# Для публичных репозиториев Actions бесплатны без лимита минут.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'За сколько дней искать'
+        required: false
+        default: '14'
+
+permissions:
+  issues: write        # только на создание Issue, больше ничего не нужно
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Искать новости и открыть Issue с кандидатами
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SCAN_DAYS: ${{ github.event.inputs.days || '14' }}
+        run: python scripts/scan_news.py
