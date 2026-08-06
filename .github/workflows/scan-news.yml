@@ -1,14 +1,14 @@
 name: Поиск кандидатов в архив
 
 on:
-  schedule:
-    - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
       days:
         description: 'За сколько дней искать'
         required: false
         default: '14'
+  schedule:
+    - cron: '0 6 * * 1'
 
 permissions:
   issues: write
@@ -20,24 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Проверить, что файлы на месте
+      - name: Проверить файлы
         run: |
-          echo "Содержимое репозитория:"
           ls -la
-          echo ""
-          if [ -f scripts/scan_news.py ]; then
-            echo "OK: scripts/scan_news.py найден"
-          else
-            echo "ОШИБКА: нет scripts/scan_news.py"
-            ls -la scripts 2>/dev/null || echo "  папки scripts нет"
-            exit 1
-          fi
+          test -f scripts/scan_news.py && echo "OK" || (echo "нет scripts/scan_news.py"; exit 1)
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Искать новости и открыть Issue с кандидатами
+      - name: Искать новости
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
