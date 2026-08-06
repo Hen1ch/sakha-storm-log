@@ -94,14 +94,18 @@ def main():
 
     cutoff = (datetime.now(timezone.utc) - timedelta(days=DAYS_BACK)).strftime('%Y-%m-%d')
     seen_links, found = set(), []
+    requests_made = requests_failed = items_seen = 0
 
     for cat, words in PHENOMENA:
         for w in words:
             for reg in REGION:
                 q = urllib.parse.quote(f'{w} {reg}')
+                requests_made += 1
                 try:
                     items = parse_feed(fetch(FEED.format(q=q)))
+                    items_seen += len(items)
                 except Exception as e:
+                    requests_failed += 1
                     print(f"  запрос «{w} {reg}» не удался: {e}", file=sys.stderr)
                     continue
                 for it in items:
@@ -119,10 +123,31 @@ def main():
                                   **it})
 
     found.sort(key=lambda x: x['date'], reverse=True)
+    print(f"Запросов: {requests_made}, неудачных: {requests_failed}, "
+          f"новостей просмотрено: {items_seen}")
     print(f"Кандидатов за последние {DAYS_BACK} дн.: {len(found)}")
 
+    # Отличаем «новостей не было» от «нас не пустили»: молчаливый нулевой
+    # результат в этих случаях выглядит одинаково, а причины разные.
+    if requests_made and requests_failed == requests_made:
+        print("\nВСЕ запросы отклонены — ни одна лента не открылась.\n"
+              "Смотрите код ошибки выше:\n"
+              "  403/429 — источник не пустил (бывает с серверных адресов);\n"
+              "            попробуйте запустить скрипт со своего компьютера:\n"
+              "            python scripts/scan_news.py\n"
+              "  таймаут — сеть недоступна;\n"
+              "  прочее  — вероятно, изменился адрес ленты.",
+              file=sys.stderr)
+        sys.exit(1)
+
+    if not found and items_seen == 0:
+        print("\nЛенты открылись, но пустые. Возможно, изменился формат "
+              "запроса — проверьте вручную ссылку из FEED в браузере.")
+        return
+
     if not found:
-        print("Ничего нового — Issue не создаётся.")
+        print("Ничего нового: всё найденное либо старше периода, либо уже "
+              "есть в архиве, либо отсеяно как посторонняя тема.")
         return
 
     CAT_RU = {'tornado': 'Смерч', 'squall': 'Шквал', 'hail': 'Град',
@@ -162,8 +187,20 @@ def main():
         headers={'Authorization': f'Bearer {token}',
                  'Accept': 'application/vnd.github+json',
                  'User-Agent': UA, 'Content-Type': 'application/json'})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        print("Issue создан:", json.loads(r.read())['html_url'])
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            print("Issue создан:", json.loads(r.read())['html_url'])
+    except urllib.error.HTTPError as e:
+        if e.code == 403:
+            print("\nGitHub не разрешил создать Issue (403).\n"
+                  "Настройки -> Actions -> General -> Workflow permissions:\n"
+                  "поставьте «Read and write permissions».", file=sys.stderr)
+        else:
+            print(f"\nНе удалось создать Issue: HTTP {e.code}\n{e.read()[:400]}",
+                  file=sys.stderr)
+        print("\n--- Список кандидатов (Issue не создан) ---\n")
+        print(body)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
