@@ -1,8 +1,5 @@
 name: Поиск кандидатов в архив
-name: Поиск кандидатов в архив
 
-# Раз в неделю по понедельникам + вручную кнопкой.
-# Для публичных репозиториев Actions бесплатны без лимита минут.
 on:
   schedule:
     - cron: '0 6 * * 1'
@@ -14,7 +11,7 @@ on:
         default: '14'
 
 permissions:
-  issues: write        # только на создание Issue, больше ничего не нужно
+  issues: write
   contents: read
 
 jobs:
@@ -23,8 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Диагностика: при коде возврата 2 («файл не найден») сразу видно,
-      # что именно лежит в репозитории, а не приходится гадать.
       - name: Проверить, что файлы на месте
         run: |
           echo "Содержимое репозитория:"
@@ -34,12 +29,7 @@ jobs:
             echo "OK: scripts/scan_news.py найден"
           else
             echo "ОШИБКА: нет scripts/scan_news.py"
-            echo "Папка scripts:"
-            ls -la scripts 2>/dev/null || echo "  папки scripts вообще нет"
-            echo ""
-            echo "Скорее всего папка не загрузилась при перетаскивании."
-            echo "Создайте файл вручную: Add file -> Create new file,"
-            echo "в имя вписать целиком: scripts/scan_news.py"
+            ls -la scripts 2>/dev/null || echo "  папки scripts нет"
             exit 1
           fi
 
