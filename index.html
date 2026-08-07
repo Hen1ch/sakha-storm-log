@@ -243,7 +243,12 @@ const CRED_COLOR = {green:'var(--conf-green)', yellow:'var(--conf-amber)', red:'
 
 let DATA = [], filterCat = 'all', query = '';
 
-fetch('data/archive.json')
+/* Метка времени в адресе + no-store: GitHub Pages просит браузер
+   кэшировать файлы на 10 минут, и после добавления записи посетитель
+   видел бы старый архив, пока не нажмёт Ctrl+F5. Требовать это от
+   людей нельзя, поэтому обходим кэш на своей стороне. Файл ~20 КБ,
+   лишний запрос ничего не стоит. */
+fetch('data/archive.json?v=' + Date.now(), {cache: 'no-store'})
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(j => { DATA = j.events || []; boot(j); })
   .catch(err => {
