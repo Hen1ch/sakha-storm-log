@@ -543,6 +543,22 @@
       "cred": "yellow",
       "added": "2026-08-05",
       "author": "seed"
+    },
+    {
+      "id": "2012-06-23-tornado-01",
+      "date": "2012-06-23",
+      "approx_date": false,
+      "cat": "tornado",
+      "title": "Landspout",
+      "loc": "с. Тулагино",
+      "detail": "Произошло в 20км от г. Якутск в посёлке Тулагино в 10:47ч\nРазрушений не оставил",
+      "sources": [
+        "Ютуб"
+      ],
+      "cred": "green",
+      "added": "2026-08-07",
+      "author": "blackmunci",
+      "issue": 2
     }
   ]
 }
