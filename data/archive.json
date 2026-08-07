@@ -237,6 +237,20 @@
       "issue": 4
     },
     {
+      "id": "2026-06-17-tornado-04",
+      "date": "2026-06-17",
+      "approx_date": false,
+      "cat": "tornado",
+      "title": "Gustnado",
+      "loc": "г.Якутск, ГРЭС.",
+      "detail": "Образовался при прохождении шквалового ворота МКС, предположительно разорвал линию электропередач.",
+      "sources": [],
+      "cred": "green",
+      "added": "2026-08-07",
+      "author": "Hen1ch",
+      "issue": 5
+    },
+    {
       "id": "2025-07-16-flood-16",
       "date": "2025-07-16",
       "approx_date": false,
