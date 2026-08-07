@@ -1,0 +1,45 @@
+name: Одобрение случая
+
+# Срабатывает, когда на Issue вешают метку «одобрено».
+# Решение принимает человек — автоматика только переносит данные в JSON,
+# чтобы не редактировать его руками и не ломать запятыми.
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write      # нужно для коммита в data/archive.json
+  issues: write        # для комментария и закрытия
+
+jobs:
+  approve:
+    if: github.event.label.name == 'одобрено'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Перенести запись в архив
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+        run: python scripts/approve_issue.py
+
+      - name: Закоммитить архив
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet data/archive.json; then
+            echo "Файл не изменился — коммитить нечего."
+          else
+            git add data/archive.json
+            git commit -m "Архив: случай из #${{ github.event.issue.number }}"
+            git push
+          fi
