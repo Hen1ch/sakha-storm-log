@@ -1,0 +1,15 @@
+# Окружение для расписания на GitHub Actions.
+# Только то, что нужно для зондирования: карты требуют cartopy и
+# отдельной безоконной версии, они пока не входят.
+name: sharppy
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - sharppy
+  - matplotlib
+  - numpy
+  - requests
+  - pip
+  - pip:
+      - geopy
