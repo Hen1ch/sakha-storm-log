@@ -1,0 +1,22 @@
+{
+  "_комментарий": "Область подобрана под бесплатный сервер: там два ядра, и вся Якутия в суточном режиме считалась бы часа три. Центр и юг с шагом 0.25 укладывается примерно в 50 минут. Хотите шире — ставьте daily=false, тогда влезет и вся республика.",
+
+  "region": {
+    "lat_min": 55.8, "lat_max": 63.5,
+    "lon_min": 123.9, "lon_max": 133.1,
+    "step": 0.25
+  },
+  "source": "nomads",
+  "date": "today",
+  "hour": "00",
+  "step_h": "012",
+  "workers": 2,
+  "params": ["outlook_tornado", "outlook_overall", "outlook_trigger",
+             "mucape", "shear6k", "srh1k"],
+  "daily": true,
+  "fronts": true,
+  "fronts_draw": true,
+  "fronts_risk": false,
+  "mask_yakutia": true,
+  "climo": "yakutia_thresholds.json"
+}

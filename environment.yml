@@ -1,0 +1,25 @@
+# Окружение для расписания на GitHub Actions.
+#
+# Ставится только через conda-forge: pip в этом наборе ломает бинарную
+# совместимость — так уже слетал pyproj, и cartopy переставал работать.
+# Исключение только для geopy, он на чистом Python.
+name: sharppy
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  # зондирование
+  - sharppy
+  - matplotlib
+  - numpy
+  - requests
+  # карты
+  - cartopy
+  - scipy
+  - xarray
+  - cfgrib
+  - eccodes
+  - netcdf4
+  - pip
+  - pip:
+      - geopy
