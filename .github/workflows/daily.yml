@@ -1,0 +1,71 @@
+name: Зондирование в группу
+
+# Якутск живёт по UTC+9, а расписание задаётся в UTC:
+#   02:00 UTC = 11:00 местного (утренний срок)
+#   14:00 UTC = 23:00 местного (вечерний срок)
+on:
+  schedule:
+    - cron: '0 2 * * *'
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Команда, например /fact ueee 12'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Проверяем выключатель ДО установки окружения: незачем тратить
+      # пять минут на сборку, если публикация приостановлена.
+      - name: Проверить выключатель
+        id: gate
+        run: |
+          if [ -f PAUSED ] || [ -f PAUSED.txt ]; then
+            echo "Публикация приостановлена файлом PAUSED."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Поставить окружение
+        if: steps.gate.outputs.skip == 'false'
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+
+      # Какой срок публиковать, решаем по времени запуска: утром
+      # берём свежий ночной зонд, вечером — дневной.
+      - name: Выбрать команду
+        if: steps.gate.outputs.skip == 'false'
+        id: pick
+        run: |
+          H=$(date -u +%H)
+          if [ -n "${{ github.event.inputs.command }}" ]; then
+            echo "cmd=${{ github.event.inputs.command }}" >> $GITHUB_OUTPUT
+            echo "ttl=По запросу" >> $GITHUB_OUTPUT
+          elif [ "$H" -lt "08" ]; then
+            echo "cmd=/fact ueee 00" >> $GITHUB_OUTPUT
+            echo "ttl=Утреннее зондирование Якутска" >> $GITHUB_OUTPUT
+          else
+            echo "cmd=/fact ueee 12" >> $GITHUB_OUTPUT
+            echo "ttl=Вечернее зондирование Якутска" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Опубликовать
+        if: steps.gate.outputs.skip == 'false'
+        shell: bash -el {0}
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT }}
+        run: |
+          python daily_post.py --command "${{ steps.pick.outputs.cmd }}" \
+                               --title "${{ steps.pick.outputs.ttl }}"
