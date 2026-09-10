@@ -10,7 +10,7 @@
 постоянно работающего процесса — Actions ничего не слушает, он только
 просыпается по времени.
 
-    python daily_post.py --command "/fact ueee 12"
+    python daily_post.py --command "/fact 24959 12"
     python daily_post.py --command "/frcst ueee ukmo 6" --title "Прогноз"
 """
 
@@ -69,7 +69,7 @@ def send_message(token, chat_id, text, parse_mode="HTML"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--command", required=True,
-                    help="команда для sharppy_core, например /fact ueee 12")
+                    help="команда для sharppy_core, например /fact 24959 12")
     ap.add_argument("--title", default="",
                     help="подпись перед сводкой")
     ap.add_argument("--chat", default=None)
