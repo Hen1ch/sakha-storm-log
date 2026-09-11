@@ -43,11 +43,11 @@ jobs:
           H=$(date -u +%H)
           IN='${{ github.event.inputs.maps }}'
           if [ "$H" -lt "08" ]; then
-            echo "sounding=/fact ueee 00" >> $GITHUB_OUTPUT
+            echo "sounding=/fact 24959 00" >> $GITHUB_OUTPUT
             echo "stitle=Утреннее зондирование Якутска" >> $GITHUB_OUTPUT
             echo "maps=${IN:-yes}" >> $GITHUB_OUTPUT
           else
-            echo "sounding=/fact ueee 12" >> $GITHUB_OUTPUT
+            echo "sounding=/fact 24959 12" >> $GITHUB_OUTPUT
             echo "stitle=Вечернее зондирование Якутска" >> $GITHUB_OUTPUT
             echo "maps=${IN:-no}" >> $GITHUB_OUTPUT
           fi
