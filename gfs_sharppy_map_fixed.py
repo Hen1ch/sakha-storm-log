@@ -1685,6 +1685,12 @@ class GFSMapApp(tk.Tk):
 
             lats = np.arange(lat_min, lat_max + 1e-5, grid_step)
             lons = np.arange(lon_min, lon_max + 1e-5, grid_step)
+            # Размеры сетки нужны РАНЬШЕ, чем строится grid_results:
+            # блок фронтов создаёт по ним маску влияния, а он идёт до
+            # подготовки точек. Без этого фронты падали с
+            # UnboundLocalError, причём только при включённом расчёте
+            # фронтов — оттого и не замечалось.
+            n_lat, n_lon = len(lats), len(lons)
 
             self.log(f"==================================================")
             self.log(f"Сетка: {len(lats)}×{len(lons)} = {len(lats)*len(lons)} точек")
@@ -2057,7 +2063,6 @@ class GFSMapApp(tk.Tk):
                             raise KeyError(key)
                         return val
 
-                    n_lat, n_lon = len(lats), len(lons)
                     grid_results = {k: np.zeros((n_lat, n_lon)) for k, v in selected_params.items() if v}
 
                     total_points = n_lat * n_lon
@@ -2991,11 +2996,20 @@ class GFSMapApp(tk.Tk):
                 }
                 title_param = title_names.get(param_key, param_key.upper())
                 if not spc_style:
+                    # В суточном режиме максимум берётся по ВСЕМ сеткам,
+                    # включая CAPE и сдвиг, — значит и подпись должна
+                    # говорить о сутках, а не об одном сроке. Иначе карта
+                    # показывает максимум за день, а числится прогнозом
+                    # на +12 ч.
+                    if len(run_list) > 1:
+                        stamp = (f"{date_str} — макс. за сутки от {hour_str}:00 "
+                                 f"UTC (+{run_list[0]}…+{run_list[-1]}ч)")
+                    else:
+                        stamp = f"{date_str} {hour_str}:00 UTC +{step_str}h"
                     # Через fig.text, а не ax.set_title: заголовок на осях
                     # с подписями сетки координат уезжает за верхний край.
                     fig.text(0.5, 0.965,
-                             f"{self.current_model} {title_param} | {date_str} "
-                             f"{hour_str}:00 UTC +{step_str}h",
+                             f"{self.current_model} {title_param} | {stamp}",
                              fontsize=13, fontweight="bold", ha='center', va='top')
 
                 self.generated_figs.append((param_key, fig))
