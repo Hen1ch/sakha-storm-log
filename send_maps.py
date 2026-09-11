@@ -101,6 +101,13 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
+    if not os.path.isdir(a.dir):
+        # Обычно означает, что расчёт не дошёл до конца. Своей ошибкой
+        # это не перекрываем: настоящая причина в шаге выше.
+        print(f"Папки {a.dir} нет — карты не построились. "
+              f"Смотрите шаг «Построить карты».")
+        return 0
+
     meta_path = os.path.join(a.dir, "maps.json")
     if os.path.exists(meta_path):
         with open(meta_path, encoding="utf-8") as f:
