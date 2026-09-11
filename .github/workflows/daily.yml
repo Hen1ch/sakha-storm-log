@@ -41,13 +41,17 @@ jobs:
         id: plan
         run: |
           H=$(date -u +%H)
+          D=$(date -u +%Y%m%d)
           IN='${{ github.event.inputs.maps }}'
+          # Дату указываем явно: без неё час читается как дата.
+          # Утренний запуск в 02 UTC берёт зонд 00 UTC того же дня —
+          # он выпущен два часа назад и уже на сервере.
           if [ "$H" -lt "08" ]; then
-            echo "sounding=/fact 24959 00" >> $GITHUB_OUTPUT
+            echo "sounding=/fact 24959 $D 00" >> $GITHUB_OUTPUT
             echo "stitle=Утреннее зондирование Якутска" >> $GITHUB_OUTPUT
             echo "maps=${IN:-yes}" >> $GITHUB_OUTPUT
           else
-            echo "sounding=/fact 24959 12" >> $GITHUB_OUTPUT
+            echo "sounding=/fact 24959 $D 12" >> $GITHUB_OUTPUT
             echo "stitle=Вечернее зондирование Якутска" >> $GITHUB_OUTPUT
             echo "maps=${IN:-no}" >> $GITHUB_OUTPUT
           fi
