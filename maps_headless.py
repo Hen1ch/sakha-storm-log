@@ -27,6 +27,16 @@ matplotlib.use("Agg")
 # ---------------------------------------------------------------------
 #  Заглушки вместо элементов окна
 # ---------------------------------------------------------------------
+def _maps_class():
+    """Класс окна из модуля карт — под любым из известных имён."""
+    for name in ("gfs_maps", "gfs_sharppy_map_fixed"):
+        try:
+            return __import__(name).GFSMapApp
+        except ModuleNotFoundError:
+            continue
+    raise ModuleNotFoundError("файл карт не найден")
+
+
 class Val:
     """Подмена tk.BooleanVar и tk.StringVar: нужен только .get()."""
 
@@ -153,17 +163,14 @@ class HeadlessApp:
     # Эти два метода расчёт зовёт только для ERA5 — заимствуем их
     # у настоящего класса, чтобы не дублировать логику.
     def _download_era5_cds(self, *a, **kw):
-        from gfs_sharppy_map_fixed import GFSMapApp
-        return GFSMapApp._download_era5_cds(self, *a, **kw)
+        return _maps_class()._download_era5_cds(self, *a, **kw)
 
     @staticmethod
     def _era5_add_geopotential_height(ds):
-        from gfs_sharppy_map_fixed import GFSMapApp
-        return GFSMapApp._era5_add_geopotential_height(ds)
+        return _maps_class()._era5_add_geopotential_height(ds)
 
     def _build_outlook_legend_figure(self):
-        from gfs_sharppy_map_fixed import GFSMapApp
-        return GFSMapApp._build_outlook_legend_figure(self)
+        return _maps_class()._build_outlook_legend_figure(self)
 
 
 def load_config(path):
@@ -211,19 +218,32 @@ def main():
 
     # tkinter нужен только чтобы модуль импортировался: класс окна
     # объявляется на уровне модуля, но мы его не создаём.
+    # Имена, под которыми файл карт встречается: дома он называется
+    # gfs_maps.py, в переписке фигурировал как gfs_sharppy_map_fixed.py.
+    # Пробуем оба, чтобы не требовать переименования.
+    M = None
+    for name in ("gfs_maps", "gfs_sharppy_map_fixed"):
+        try:
+            M = __import__(name)
+            print(f"Модуль карт: {name}.py")
+            break
+        except ModuleNotFoundError:
+            continue
+        except Exception as e:
+            sys.exit(f"{name}.py не импортируется: {type(e).__name__}: {e}")
+
     try:
-        import gfs_sharppy_map_fixed as M
+        if M is None:
+            raise ModuleNotFoundError
     except ModuleNotFoundError:
         # Самая частая причина — файл просто не загружен: при
         # перетаскивании в браузер часть файлов иногда пропускается молча.
         have = sorted(n for n in os.listdir(root) if n.endswith((".py", ".json")))
         sys.exit(
-            "Не найден gfs_sharppy_map_fixed.py — положите его в корень "
-            "репозитория.\n"
-            "Это ваш обычный файл карт, тот же, что запускаете дома.\n\n"
+            "Не найден файл карт — положите в корень репозитория\n"
+            "gfs_maps.py (или gfs_sharppy_map_fixed.py).\n"
+            "Это ваш обычный файл, тот же, что запускаете дома.\n\n"
             f"Сейчас в папке есть: {', '.join(have) or '(пусто)'}")
-    except Exception as e:
-        sys.exit(f"Модуль карт не импортируется: {type(e).__name__}: {e}")
 
     # Пороги: тот же загрузчик, что в окне.
     climo = cfg.get("climo")
