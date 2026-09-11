@@ -10,7 +10,7 @@
 постоянно работающего процесса — Actions ничего не слушает, он только
 просыпается по времени.
 
-    python daily_post.py --command "/fact 24959 12"
+    python daily_post.py --command "/fact ueee 12"
     python daily_post.py --command "/frcst ueee ukmo 6" --title "Прогноз"
 """
 
@@ -43,6 +43,42 @@ def paused(root):
     return None
 
 
+def check_token(token, chat_id):
+    """
+    Проверяет, что бот существует и группа ему доступна.
+
+    Телеграм отвечает 404 на неверный токен — это чаще всего означает,
+    что при копировании в Secrets потерялась часть строки или добавился
+    пробел.
+    """
+    import requests
+    try:
+        r = requests.get(f"https://api.telegram.org/bot{token}/getMe",
+                         timeout=30)
+        if r.status_code == 404:
+            return False, ("Телеграм не знает такого бота (404). Токен в "
+                           "TELEGRAM_TOKEN неверный или скопирован не "
+                           "целиком — он выглядит как 1234567890:AAE... "
+                           "и содержит двоеточие.")
+        r.raise_for_status()
+        name = (r.json().get("result") or {}).get("username", "?")
+    except Exception as e:
+        return False, f"Не удалось проверить токен: {type(e).__name__}: {e}"
+
+    try:
+        r = requests.get(f"https://api.telegram.org/bot{token}/getChat",
+                         params={"chat_id": chat_id}, timeout=30)
+        if r.status_code != 200:
+            return False, (f"Бот @{name} существует, но группа {chat_id} "
+                           f"ему недоступна ({r.status_code}). Проверьте "
+                           f"номер группы и что бот в неё добавлен.")
+    except Exception as e:
+        return False, f"Группа не проверилась: {type(e).__name__}: {e}"
+
+    print(f"Бот @{name}, группа {chat_id} — доступны.")
+    return True, ""
+
+
 def send_photo(token, chat_id, buf, caption, parse_mode="HTML"):
     import requests
     r = requests.post(
@@ -69,7 +105,7 @@ def send_message(token, chat_id, text, parse_mode="HTML"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--command", required=True,
-                    help="команда для sharppy_core, например /fact 24959 12")
+                    help="команда для sharppy_core, например /fact ueee 12")
     ap.add_argument("--title", default="",
                     help="подпись перед сводкой")
     ap.add_argument("--chat", default=None)
@@ -84,11 +120,18 @@ def main():
         print("Уберите файл PAUSED из репозитория, чтобы возобновить.")
         return 0
 
-    token = os.environ.get("TELEGRAM_TOKEN")
-    chat = a.chat or os.environ.get("TELEGRAM_CHAT")
-    if not a.dry_run and (not token or not chat):
-        sys.exit("Нет TELEGRAM_TOKEN или TELEGRAM_CHAT в переменных "
-                 "окружения. На GitHub они задаются в Secrets.")
+    token = os.environ.get("TELEGRAM_TOKEN", "").strip()
+    chat = (a.chat or os.environ.get("TELEGRAM_CHAT", "")).strip()
+    if not a.dry_run:
+        if not token or not chat:
+            sys.exit("Нет TELEGRAM_TOKEN или TELEGRAM_CHAT в переменных "
+                     "окружения. На GitHub они задаются в Secrets.")
+        # Проверяем токен ДО расчёта: иначе профиль считается несколько
+        # минут, а потом выясняется, что отправить его некуда. Заодно
+        # 404 здесь сразу означает неверный токен, а не сбой сети.
+        ok, why = check_token(token, chat)
+        if not ok:
+            sys.exit(why)
 
     sys.path.insert(0, root)
     import sharppy_core as core
