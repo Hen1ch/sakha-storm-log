@@ -213,8 +213,17 @@ def main():
     # объявляется на уровне модуля, но мы его не создаём.
     try:
         import gfs_sharppy_map_fixed as M
+    except ModuleNotFoundError:
+        # Самая частая причина — файл просто не загружен: при
+        # перетаскивании в браузер часть файлов иногда пропускается молча.
+        have = sorted(n for n in os.listdir(root) if n.endswith((".py", ".json")))
+        sys.exit(
+            "Не найден gfs_sharppy_map_fixed.py — положите его в корень "
+            "репозитория.\n"
+            "Это ваш обычный файл карт, тот же, что запускаете дома.\n\n"
+            f"Сейчас в папке есть: {', '.join(have) or '(пусто)'}")
     except Exception as e:
-        sys.exit(f"Не импортируется модуль карт: {type(e).__name__}: {e}")
+        sys.exit(f"Модуль карт не импортируется: {type(e).__name__}: {e}")
 
     # Пороги: тот же загрузчик, что в окне.
     climo = cfg.get("climo")
