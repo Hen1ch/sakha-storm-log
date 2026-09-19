@@ -9,7 +9,7 @@
   "source": "nomads",
   "date": "today",
   "hour": "00",
-  "step_h": "012",
+  "step_h": "003",
   "workers": 2,
   "params": ["outlook_tornado", "outlook_overall", "outlook_trigger",
              "mucape", "shear6k", "srh1k"],
