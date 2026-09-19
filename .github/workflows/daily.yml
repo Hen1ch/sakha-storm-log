@@ -46,7 +46,7 @@ jobs:
           # Дату указываем явно: без неё час читается как дата.
           # Утренний запуск в 02 UTC берёт зонд 00 UTC того же дня —
           # он выпущен два часа назад и уже на сервере.
-          if [ "$H" -lt "08" ]; then
+          if [ '${{ github.event.schedule }}' = '23 2 * * *' ] || [ "$H" -lt "08" ]; then
             echo "sounding=/fact 24959 $D 00" >> $GITHUB_OUTPUT
             echo "stitle=Утреннее зондирование Якутска" >> $GITHUB_OUTPUT
             echo "maps=${IN:-yes}" >> $GITHUB_OUTPUT
